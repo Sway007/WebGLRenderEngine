@@ -10,6 +10,7 @@ const devServer = {
   hot: true,
   // writeToDisk: true,
   stats: "errors-only",
+  host: "0.0.0.0",
 };
 
 module.exports = {
