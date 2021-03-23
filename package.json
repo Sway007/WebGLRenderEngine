@@ -11,7 +11,8 @@
     "dev-engine": "nodemon -e ts,js,json --watch src --exec 'npm run build-engine'",
     "build": "npm run clean && webpack --mode production && npm run build-engine",
     "demo": "webpack serve -c examples/webpack.config.js --mode development",
-    "clean": "rm -rf lib"
+    "clean": "rm -rf lib",
+    "build-demo": "webpack -c examples/webpack.config.js --mode production"
   },
   "keywords": [
     "WebGL",
