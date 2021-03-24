@@ -8,7 +8,7 @@
   "scripts": {
     "test": "jest",
     "build-engine": "tsc && cp src/**/*.d.ts lib",
-    "dev-engine": "nodemon -e ts,js,json --watch src --exec 'npm run build-engine'",
+    "dev-engine": "nodemon -e ts,js,json --watch src --exec 'npm run clean && npm run build-engine'",
     "build": "npm run clean && webpack --mode production && npm run build-engine",
     "demo": "webpack serve -c examples/webpack.config.js --mode development",
     "clean": "rm -rf lib",

@@ -1,8 +1,7 @@
-import { glMatrix, vec2, vec3 } from "gl-matrix";
+import { vec2, vec3 } from "gl-matrix";
 import { BaseNode, Sprite } from "../../lib";
-import { SpriteObject, Ball, Paddle, Brick } from "../utils/GameObjects";
+import { Ball, Paddle, Brick, vectorDirection } from "../utils/GameObjects";
 import { GameLevel, GameInfo } from "./Constants";
-import { throttle } from "../utils";
 
 enum GameState {
   RUNNING = 1,
@@ -52,22 +51,6 @@ export class Game implements DeviceDelegate {
     );
 
     return innerLen + ball.getCollisionRadius() >= centerOffsetLength;
-    // const ret = innerLen + ball.getCollisionRadius() >= centerOffsetLength;
-    // if (ret) {
-    //   console.log(
-    //     ballPos,
-    //     blockPos,
-    //     ballCenter,
-    //     blockCenter,
-    //     innerLen,
-    //     centerOffsetLength,
-    //     centerOffsetVec,
-    //     absCos,
-    //     absSin
-    //   );
-    //   debugger;
-    // }
-    // return ret;
   }
 
   /**
@@ -94,7 +77,6 @@ export class Game implements DeviceDelegate {
 
   private loadObjects() {
     const { gl } = this;
-    const self = this;
 
     this.loadGameLevel();
 
@@ -122,7 +104,7 @@ export class Game implements DeviceDelegate {
       ball.setPositionLimits([
         0,
         this.size.width - ball.width,
-        sizePaddle.height,
+        0,
         this.size.height - ball.height,
       ]);
       this.ball = ball;
@@ -212,13 +194,33 @@ export class Game implements DeviceDelegate {
 
     if (this.state !== GameState.RUNNING) return;
 
-    // 碰撞检测
+    // 碰撞检测、反弹
     if (this.ball) {
-      this.bricks.forEach((brick) => {
-        if (Game.checkCollision(this.ball, brick)) {
+      const bounce = (ball: Ball, sprite: Sprite) => {
+        const ballPos = ball.getPosition();
+        const brickPos = sprite.getPosition();
+        const targetV = vec2.fromValues(
+          ballPos[0] - brickPos[0],
+          ballPos[1] - brickPos[1]
+        );
+        const dir = vectorDirection(targetV, sprite.getDirectionInfos());
+        ball.rebound(dir);
+      };
+
+      for (const brick of this.bricks) {
+        if (!brick.isCrashed && Game.checkCollision(this.ball, brick)) {
           brick.crash();
+          bounce(this.ball, brick);
+          break;
         }
-      });
+      }
+
+      if (
+        this.ball.getPosition()[1] <= this.paddle.height &&
+        Game.checkCollision(this.ball, this.paddle)
+      ) {
+        bounce(this.ball, this.paddle);
+      }
     }
 
     this.ball?.move();

@@ -2,7 +2,20 @@ import { BaseNode } from "./BaseNode";
 import { Shader } from "../Shader";
 import { SHADER_LOC, SHADER_VAR_NAME, SHADER } from "../Constants";
 import { Texture2D } from "../Texture";
-import { mat4, vec3 } from "gl-matrix";
+import { mat4, vec3, vec2 } from "gl-matrix";
+
+export interface DirectionInfo {
+  dir: Direction;
+  vec: vec2;
+  minCos: number;
+}
+
+export enum Direction {
+  UP = 0,
+  RIGHT,
+  DOWN,
+  LEFT,
+}
 
 export class Sprite extends BaseNode {
   texture?: Texture2D;
@@ -114,5 +127,30 @@ export class Sprite extends BaseNode {
     gl.bindVertexArray(VAO);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     gl.bindVertexArray(null);
+  }
+
+  getDirectionInfos(): DirectionInfo[] {
+    return [
+      {
+        dir: Direction.DOWN,
+        vec: vec2.fromValues(0, -1),
+        minCos: Math.abs(this.height / vec2.length([this.width, this.height])),
+      },
+      {
+        dir: Direction.UP,
+        vec: vec2.fromValues(0, 1),
+        minCos: Math.abs(this.height / vec2.length([this.width, this.height])),
+      },
+      {
+        dir: Direction.RIGHT,
+        vec: vec2.fromValues(1, 0),
+        minCos: Math.abs(this.width / vec2.length([this.width, this.height])),
+      },
+      {
+        dir: Direction.LEFT,
+        vec: vec2.fromValues(-1, 0),
+        minCos: Math.abs(this.width / vec2.length([this.width, this.height])),
+      },
+    ];
   }
 }

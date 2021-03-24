@@ -1,4 +1,4 @@
-export { Shader } from "./engine/Shader";
-export { Texture2D } from "./engine/Texture";
-export { BaseNode } from "./engine/renders/BaseNode";
-export { Sprite } from "./engine/renders/Sprite";
+export * from "./engine/Shader";
+export * from "./engine/Texture";
+export * from "./engine/renders/BaseNode";
+export * from "./engine/renders/Sprite";
