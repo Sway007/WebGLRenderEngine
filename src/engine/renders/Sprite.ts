@@ -6,12 +6,12 @@ import { mat4, vec3, vec2 } from "gl-matrix";
 
 export interface DirectionInfo {
   dir: Direction;
-  vec: vec2;
-  minCos: number;
+  vec: vec2; // 方向向量
+  minCos: number; // 最小余弦值
 }
 
 export enum Direction {
-  UP = 0,
+  UP = 1,
   RIGHT,
   DOWN,
   LEFT,
@@ -44,6 +44,13 @@ export class Sprite extends BaseNode {
    */
   setFrame(image: TexImageSource) {
     this.texture = new Texture2D(this.gl, image);
+  }
+
+  getCenter2D(): vec2 {
+    return vec2.fromValues(
+      this.position[0] + this.width / 2,
+      this.position[1] + this.height / 2
+    );
   }
 
   initRenderData() {

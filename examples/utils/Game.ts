@@ -1,6 +1,6 @@
 import { vec2, vec3 } from "gl-matrix";
-import { BaseNode, Sprite } from "../../lib";
-import { Ball, Paddle, Brick, vectorDirection } from "../utils/GameObjects";
+import { BaseNode, Direction, Sprite } from "../../lib";
+import { Ball, Paddle, Brick, Movable } from "../utils/GameObjects";
 import { GameLevel, GameInfo } from "./Constants";
 
 enum GameState {
@@ -24,19 +24,11 @@ export class Game implements DeviceDelegate {
    * AABB圆形碰撞检测
    * @param ball 球体
    * @param block 矩形体
+   * @returns 碰撞方向
    */
-  static checkCollision(ball: Ball, block: Sprite) {
-    const ballPos = ball.getPosition();
-    const blockPos = block.getPosition();
-
-    const ballCenter: vec2 = [
-      ballPos[0] + ball.width / 2,
-      ballPos[1] + ball.height / 2,
-    ];
-    const blockCenter: vec2 = [
-      blockPos[0] + block.width / 2,
-      blockPos[1] + block.height / 2,
-    ];
+  static checkCollision(ball: Ball, block: Sprite): Direction | undefined {
+    const ballCenter = ball.getCenter2D();
+    const blockCenter = block.getCenter2D();
 
     const centerOffsetVec = vec2.sub(vec2.create(), ballCenter, blockCenter);
     const centerOffsetLength = vec2.length(centerOffsetVec);
@@ -50,7 +42,15 @@ export class Game implements DeviceDelegate {
       block.height / (2 * absSin)
     );
 
-    return innerLen + ball.getCollisionRadius() >= centerOffsetLength;
+    if (innerLen + ball.getCollisionRadius() >= centerOffsetLength) {
+      for (const directionInfo of block.getDirectionInfos()) {
+        if (
+          vec2.dot(centerOffsetVec, directionInfo.vec) >= directionInfo.minCos
+        ) {
+          return directionInfo.dir;
+        }
+      }
+    }
   }
 
   /**
@@ -100,7 +100,7 @@ export class Game implements DeviceDelegate {
       position: posBall,
       color: [Math.random(), Math.random(), Math.random()],
     }).then((ball) => {
-      ball.setVelocity([2, 2]);
+      ball.setVelocity([2, -2]);
       ball.setPositionLimits([
         0,
         this.size.width - ball.width,
@@ -196,30 +196,22 @@ export class Game implements DeviceDelegate {
 
     // 碰撞检测、反弹
     if (this.ball) {
-      const bounce = (ball: Ball, sprite: Sprite) => {
-        const ballPos = ball.getPosition();
-        const brickPos = sprite.getPosition();
-        const targetV = vec2.fromValues(
-          ballPos[0] - brickPos[0],
-          ballPos[1] - brickPos[1]
-        );
-        const dir = vectorDirection(targetV, sprite.getDirectionInfos());
-        ball.rebound(dir);
-      };
-
       for (const brick of this.bricks) {
-        if (!brick.isCrashed && Game.checkCollision(this.ball, brick)) {
+        const colliedDir = Game.checkCollision(this.ball, brick);
+        if (!brick.isCrashed && colliedDir) {
           brick.crash();
-          bounce(this.ball, brick);
+          this.ball.rebound(colliedDir);
           break;
         }
       }
 
-      if (
-        this.ball.getPosition()[1] <= this.paddle.height &&
-        Game.checkCollision(this.ball, this.paddle)
-      ) {
-        bounce(this.ball, this.paddle);
+      if (this.ball.getPosition()[1] <= this.paddle.height) {
+        const colliedDir2 = Game.checkCollision(this.ball, this.paddle);
+        if (colliedDir2) {
+          this.ball.rebound(colliedDir2);
+          const curV = this.ball.getVelocity();
+          this.ball.setVelocity([curV[0], Math.abs(curV[1])]);
+        }
       }
     }
 

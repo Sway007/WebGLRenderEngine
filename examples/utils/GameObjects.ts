@@ -1,4 +1,4 @@
-import { Sprite } from "../../lib";
+import { Sprite, Direction, DirectionInfo } from "../../lib";
 import { ResourceManager } from "./ResourceManager";
 import ballImg from "../assets/awesomeface.png";
 import blockImg from "../assets/block.png";
@@ -11,19 +11,6 @@ interface GameObjectOptions extends NodeOptions {
   width?: number;
   height?: number;
   color?: COLOR;
-}
-
-interface DirectionInfo {
-  dir: Direction;
-  vec: vec2;
-  minCos: number;
-}
-
-export enum Direction {
-  UP = 0,
-  RIGHT,
-  DOWN,
-  LEFT,
 }
 
 enum BallStatus {
@@ -60,12 +47,16 @@ export namespace SpriteObject {
   }
 }
 
-abstract class Movable extends Sprite {
+export abstract class Movable extends Sprite {
   protected velocity: vec2 = vec2.fromValues(0, 0);
   protected positionLimits: [number, number, number, number] | undefined;
 
   setVelocity(velocity: vec2) {
     this.velocity = velocity;
+  }
+
+  getVelocity() {
+    return this.velocity;
   }
 
   /**
@@ -214,46 +205,4 @@ export class Brick extends Sprite {
   render() {
     if (!this.isCrashed) super.render();
   }
-
-  getDirectionInfos(): DirectionInfo[] {
-    return [
-      {
-        dir: Direction.DOWN,
-        vec: vec2.fromValues(0, -1),
-        minCos: Math.abs(this.height / vec2.length([this.width, this.height])),
-      },
-      {
-        dir: Direction.UP,
-        vec: vec2.fromValues(0, 1),
-        minCos: Math.abs(this.height / vec2.length([this.width, this.height])),
-      },
-      {
-        dir: Direction.RIGHT,
-        vec: vec2.fromValues(1, 0),
-        minCos: Math.abs(this.width / vec2.length([this.width, this.height])),
-      },
-      {
-        dir: Direction.LEFT,
-        vec: vec2.fromValues(-1, 0),
-        minCos: Math.abs(this.width / vec2.length([this.width, this.height])),
-      },
-    ];
-  }
-}
-
-/**
- * 检测向量朝向
- * @param target 检测目标向量
- * @param directionInfos [{dir: 方向, minCos: 最小余弦值}]
- */
-export function vectorDirection(
-  target: vec2,
-  directionInfos: DirectionInfo[]
-): Direction {
-  for (const info of directionInfos) {
-    if (vec2.dot(info.vec, target) <= info.minCos) {
-      return info.dir;
-    }
-  }
-  throw new Error(`err in function vectorDirection, ${arguments}`);
 }
