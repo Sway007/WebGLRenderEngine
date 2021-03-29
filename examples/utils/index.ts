@@ -3,8 +3,8 @@ export namespace device {
    * 物理尺寸通过style中的width/height属性设置，canvas本身的像素尺寸设置通过canvas.height/canvas.width进行设置，两者的比率需要设置成物理设备的像素比devicePixelRatio，否则会走样
    */
   export function setCanvasPixelRatio(canvas: HTMLCanvasElement) {
-    canvas.width = canvas.clientWidth * window.devicePixelRatio;
-    canvas.height = canvas.clientHeight * window.devicePixelRatio;
+    canvas.width = canvas.clientWidth * Math.max(window.devicePixelRatio, 2);
+    canvas.height = canvas.clientHeight * Math.max(window.devicePixelRatio, 2);
   }
 }
 
