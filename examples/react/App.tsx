@@ -2,19 +2,11 @@ import React, { useEffect, useState, useMemo } from "react";
 
 import { device } from "../utils";
 import { Game } from "../utils/Game";
-import {
-  StatisticPanel,
-  PerformanceStatistic,
-} from "../components/StatisticPanel";
+import { StatisticPanel } from "../components/StatisticPanel";
 
 import "./App.scss";
 
 export default function App() {
-  const [
-    performanceStatistic,
-    setPerformanceStatistic,
-  ] = useState<PerformanceStatistic>({ fps: 0, memory: 0 });
-
   const canvasWidth = 400,
     canvasHeight = 300;
 
