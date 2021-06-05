@@ -111,3 +111,5 @@ npm run build # 渲染引擎工程构建
 
 npm run demo # 进入Demo工程开发模式，启动devServer
 ```
+
+已部署至 devcloud: http://9.134.124.205/webgl-engine-demo/index.html
